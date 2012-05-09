@@ -210,7 +210,7 @@
 	</repositories>
 
 	<modules>
-		<module>heraldry-server</module>
+	<module>heraldry-server</module>
     	<module>heraldry-core</module>
     	<module>heraldry-network</module>
     	<module>heraldry-client</module>
