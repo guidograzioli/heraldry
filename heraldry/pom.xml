@@ -214,5 +214,6 @@
     	<module>heraldry-core</module>
     	<module>heraldry-network</module>
     	<module>heraldry-client</module>
-  </modules>
+    	<module>heraldry-data</module>
+	</modules>
 </project>
