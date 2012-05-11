@@ -6,9 +6,20 @@
 	<artifactId>heraldry</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
-
 	<name>heraldry</name>
 	<url>http://heraldry.undebugged.com</url>
+	
+	<licenses>
+		<license>
+			<name>BSD-2-Clause</name>
+			<url>http://www.opensource.org/licenses/BSD-2-Clause</url>
+		</license>
+	</licenses>
+
+	<scm>
+		<developerConnection>scm:git:https://username@github.com/guidograzioli/heraldry.git</developerConnection>
+		<url>http://github.com/guidograzioli/heraldry</url>
+	</scm>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -210,10 +221,10 @@
 	</repositories>
 
 	<modules>
-	<module>heraldry-server</module>
-    	<module>heraldry-core</module>
-    	<module>heraldry-network</module>
-    	<module>heraldry-client</module>
-    	<module>heraldry-data</module>
+		<module>heraldry-server</module>
+		<module>heraldry-network</module>
+		<module>heraldry-client</module>
+		<module>heraldry-data</module>
 	</modules>
+	
 </project>

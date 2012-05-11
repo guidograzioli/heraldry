@@ -15,6 +15,18 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
+  			<dependency>
+				<groupId>com.undebugged</groupId>
+				<artifactId>heraldry-network</artifactId>
+			</dependency>  
+  			<dependency>
+				<groupId>com.jme3</groupId>
+				<artifactId>jME3-core</artifactId>
+			</dependency>
+  			<dependency>
+				<groupId>com.jme3</groupId>
+				<artifactId>jME3-jbullet</artifactId>
+			</dependency>			
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

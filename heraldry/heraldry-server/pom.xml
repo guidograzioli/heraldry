@@ -35,17 +35,20 @@
 	<dependencies>
 		<dependency>
 			<groupId>com.undebugged</groupId>
-			<artifactId>heraldry-core</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.undebugged</groupId>
 			<artifactId>heraldry-network</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.jme3</groupId>
 			<artifactId>jME3-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.jme3</groupId>
+			<artifactId>jME3-jbullet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.jme3</groupId>
+			<artifactId>jbullet</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.hibernate</groupId>
