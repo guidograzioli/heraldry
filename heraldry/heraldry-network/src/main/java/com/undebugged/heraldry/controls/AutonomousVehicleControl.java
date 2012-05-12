@@ -40,6 +40,7 @@ import com.jme3.network.Client;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
+import com.undebugged.heraldry.messages.ActionMessage;
 
 /**
  * Automomous vehicle control, implements the AutonomousControl interface and

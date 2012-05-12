@@ -29,57 +29,31 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.undebugged.heraldry.controls;
+package com.undebugged.heraldry.messages;
 
-import java.io.IOException;
-
-import com.jme3.export.JmeExporter;
-import com.jme3.export.JmeImporter;
-import com.jme3.renderer.RenderManager;
-import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.control.Control;
-import com.undebugged.heraldry.core.WorldManager;
-
+import com.jme3.network.AbstractMessage;
+import com.jme3.network.serializing.Serializable;
 
 /**
- * This class implements NavigationControl but actually extends Pathfinder which
- * uses the NavMesh, you can replace it with any Pathfinding system. It will
- * be used by the AutonomousControl then.
+ * basic chat message, name is filled on server
  * @author normenhansen
  */
-public class NavMeshNavigationControl extends NavMeshPathfinder implements NavigationControl{
+@Serializable()
+public class ChatMessage extends AbstractMessage {
 
-    public NavMeshNavigationControl(WorldManager world) {
-        super(world.getNavMesh());
+    public String text;
+    public String name;
+
+    public ChatMessage() {
     }
 
-    public void setSpatial(Spatial spatial) {
+    public ChatMessage(String text) {
+        this.text = text;
     }
 
-    public void setEnabled(boolean enabled) {
-    }
-
-    public boolean isEnabled() {
-        return true;
-    }
-
-    public void update(float tpf) {
-    }
-
-    public void render(RenderManager rm, ViewPort vp) {
-    }
-
-    public Control cloneForSpatial(Spatial spatial) {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    public void write(JmeExporter ex) throws IOException {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    public void read(JmeImporter im) throws IOException {
-        throw new UnsupportedOperationException("Not supported.");
+    public ChatMessage(String name, String text) {
+        this.text = text;
+        this.name = name;
     }
 
 }

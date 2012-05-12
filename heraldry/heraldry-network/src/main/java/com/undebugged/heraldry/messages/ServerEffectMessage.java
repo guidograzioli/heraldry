@@ -29,57 +29,44 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.undebugged.heraldry.controls;
+package com.undebugged.heraldry.messages;
 
-import java.io.IOException;
-
-import com.jme3.export.JmeExporter;
-import com.jme3.export.JmeImporter;
-import com.jme3.renderer.RenderManager;
-import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.control.Control;
-import com.undebugged.heraldry.core.WorldManager;
-
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
+import com.jme3.network.serializing.Serializable;
 
 /**
- * This class implements NavigationControl but actually extends Pathfinder which
- * uses the NavMesh, you can replace it with any Pathfinding system. It will
- * be used by the AutonomousControl then.
+ * Message sent to play effect on client
  * @author normenhansen
  */
-public class NavMeshNavigationControl extends NavMeshPathfinder implements NavigationControl{
+@Serializable()
+public class ServerEffectMessage extends PhysicsSyncMessage {
 
-    public NavMeshNavigationControl(WorldManager world) {
-        super(world.getNavMesh());
+    public long effectId;
+    public String name;
+    public Vector3f location;
+    public Quaternion rotation;
+    public Vector3f endLocation;
+    public Quaternion endRotation;
+    public float playTime;
+
+    public ServerEffectMessage() {
     }
 
-    public void setSpatial(Spatial spatial) {
+    public ServerEffectMessage(long id, String name, Vector3f location, Quaternion rotation, Vector3f endLocation, Quaternion endRotation, float time) {
+        this.syncId = -2;
+        this.effectId = id;
+        this.name = name;
+        this.location = location;
+        this.rotation = rotation;
+        this.endLocation = endLocation;
+        this.endRotation = endRotation;
+        this.playTime = time;
     }
 
-    public void setEnabled(boolean enabled) {
+    @Override
+    public void applyData(Object object) {
+        ClientEffectsManager manager = (ClientEffectsManager) object;
+        manager.playEffect(effectId, name, location, endLocation, rotation, endRotation, playTime);
     }
-
-    public boolean isEnabled() {
-        return true;
-    }
-
-    public void update(float tpf) {
-    }
-
-    public void render(RenderManager rm, ViewPort vp) {
-    }
-
-    public Control cloneForSpatial(Spatial spatial) {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    public void write(JmeExporter ex) throws IOException {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    public void read(JmeImporter im) throws IOException {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
 }

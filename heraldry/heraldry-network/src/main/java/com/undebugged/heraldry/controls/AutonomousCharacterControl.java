@@ -38,6 +38,7 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
 import com.undebugged.heraldry.core.Heraldry;
+import com.undebugged.heraldry.messages.ActionMessage;
 
 
 /**
@@ -105,7 +106,7 @@ public class AutonomousCharacterControl extends NetworkedAutonomousControl {
         }
         Float spatialSpeed = (Float) spatial.getUserData("Speed");
         if (spatialSpeed != null) {
-            speed = spatialSpeed * Globals.PHYSICS_FPS;
+            speed = spatialSpeed * Heraldry.PHYSICS_FPS;
         }
         characterControl = spatial.getControl(CharacterControl.class);
     }

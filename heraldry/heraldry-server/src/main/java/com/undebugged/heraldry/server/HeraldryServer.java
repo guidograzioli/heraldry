@@ -12,7 +12,6 @@ import com.jme3.system.AppSettings;
 import com.jme3.system.JmeContext;
 import com.undebugged.heraldry.core.Heraldry;
 import com.undebugged.heraldry.core.WorldManager;
-import com.undebugged.heraldry.network.PhysicsSyncManager;
 
 public class HeraldryServer extends SimpleApplication {
 
@@ -22,7 +21,7 @@ public class HeraldryServer extends SimpleApplication {
     private WorldManager worldManager;
     private ServerGameManager gameManager;
     private ServerPhysicsSyncManager syncManager;
-    private ServerListener listenerManager;
+    private ServerNetListener listenerManager;
     private BulletAppState bulletState;
     
     
@@ -52,7 +51,7 @@ public class HeraldryServer extends SimpleApplication {
         bulletState = new BulletAppState();
         getStateManager().attach(bulletState);
         bulletState.getPhysicsSpace().setAccuracy(Heraldry.PHYSICS_FPS);
-        syncManager = new PhysicsSyncManager(app, server);
+        syncManager = new ServerPhysicsSyncManager(app, server);
         syncManager.setSyncFrequency(Heraldry.NETWORK_SYNC_FREQUENCY);
         syncManager.setMessageTypes();
 	    

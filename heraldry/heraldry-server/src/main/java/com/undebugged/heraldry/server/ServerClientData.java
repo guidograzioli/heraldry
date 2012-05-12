@@ -29,57 +29,69 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.undebugged.heraldry.controls;
+package com.undebugged.heraldry.server;
 
-import java.io.IOException;
-
-import com.jme3.export.JmeExporter;
-import com.jme3.export.JmeImporter;
-import com.jme3.renderer.RenderManager;
-import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.control.Control;
-import com.undebugged.heraldry.core.WorldManager;
-
+import java.util.HashMap;
 
 /**
- * This class implements NavigationControl but actually extends Pathfinder which
- * uses the NavMesh, you can replace it with any Pathfinding system. It will
- * be used by the AutonomousControl then.
+ * Stores info about active clients on the server
  * @author normenhansen
  */
-public class NavMeshNavigationControl extends NavMeshPathfinder implements NavigationControl{
+public class ServerClientData {
 
-    public NavMeshNavigationControl(WorldManager world) {
-        super(world.getNavMesh());
+    private static HashMap<Integer, ServerClientData> players = new HashMap<Integer, ServerClientData>();
+    private int id;
+    private long playerId;
+    private boolean connected;
+
+    public static synchronized void add(int id) {
+        players.put(id, new ServerClientData(id));
     }
 
-    public void setSpatial(Spatial spatial) {
+    public static synchronized void remove(int id) {
+        players.remove(id);
     }
 
-    public void setEnabled(boolean enabled) {
+    public static synchronized boolean exsists(int id) {
+        return players.containsKey(id);
     }
 
-    public boolean isEnabled() {
-        return true;
+    public static synchronized boolean isConnected(int id) {
+        return players.get(id).isConnected();
     }
 
-    public void update(float tpf) {
+    public static synchronized void setConnected(int id, boolean connected) {
+        players.get(id).setConnected(connected);
     }
 
-    public void render(RenderManager rm, ViewPort vp) {
+    public static synchronized long getPlayerId(int id) {
+        return players.get(id).getPlayerId();
     }
 
-    public Control cloneForSpatial(Spatial spatial) {
-        throw new UnsupportedOperationException("Not supported.");
+    public static synchronized void setPlayerId(int id, long playerId) {
+        players.get(id).setPlayerId(playerId);
     }
 
-    public void write(JmeExporter ex) throws IOException {
-        throw new UnsupportedOperationException("Not supported.");
+    /**
+     * Object implementation of ClientData
+     */
+    public ServerClientData(int id) {
+        this.id = id;
     }
 
-    public void read(JmeImporter im) throws IOException {
-        throw new UnsupportedOperationException("Not supported.");
+    public long getPlayerId() {
+        return playerId;
     }
 
+    public void setPlayerId(long playerId) {
+        this.playerId = playerId;
+    }
+
+    public boolean isConnected() {
+        return connected;
+    }
+
+    public void setConnected(boolean connected) {
+        this.connected = connected;
+    }
 }

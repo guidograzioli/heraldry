@@ -31,18 +31,16 @@
  */
 package com.undebugged.heraldry.controls;
 
+import java.io.IOException;
+
 import com.jme3.export.JmeExporter;
 import com.jme3.export.JmeImporter;
 import com.jme3.math.Vector3f;
-import com.jme3.monkeyzone.messages.AutoControlMessage;
-import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.network.Client;
-import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.undebugged.heraldry.messages.ActionMessage;
+import com.undebugged.heraldry.messages.AutoControlMessage;
 
 /**
  * Abstract Autonomous Control, handles sending to server when client is set

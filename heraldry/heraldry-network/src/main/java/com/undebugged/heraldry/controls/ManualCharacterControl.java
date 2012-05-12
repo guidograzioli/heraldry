@@ -35,13 +35,12 @@ import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.monkeyzone.Globals;
-import com.jme3.monkeyzone.messages.ActionMessage;
 import com.jme3.network.Client;
-import com.jme3.network.physicssync.PhysicsSyncManager;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Spatial;
+import com.undebugged.heraldry.core.Heraldry;
+import com.undebugged.heraldry.messages.ActionMessage;
 
 /**
  * Manual character control, implements ManualControl interface and controls
@@ -61,7 +60,7 @@ public class ManualCharacterControl extends NetworkedManualControl {
     private float rotAmountY = 0;
     private float walkAmount = 0;
     private float strafeAmount = 0;
-    private float speed = 10f * Globals.PHYSICS_FPS;
+    private float speed = 10f * Heraldry.PHYSICS_FPS;
     private Vector3f tempVec = new Vector3f();
 
     public ManualCharacterControl() {
@@ -122,7 +121,7 @@ public class ManualCharacterControl extends NetworkedManualControl {
         }
         Float spatialSpeed = (Float) spatial.getUserData("Speed");
         if (spatialSpeed != null) {
-            speed = spatialSpeed * Globals.PHYSICS_FPS;
+            speed = spatialSpeed * Heraldry.PHYSICS_FPS;
         }
     }
 

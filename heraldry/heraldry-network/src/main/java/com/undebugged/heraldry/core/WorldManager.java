@@ -39,8 +39,6 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import jme3tools.optimize.GeometryBatchFactory;
-
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.asset.AssetManager;
@@ -52,15 +50,12 @@ import com.jme3.bullet.collision.PhysicsRayTestResult;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.bullet.control.RigidBodyControl;
 import com.jme3.bullet.control.VehicleControl;
-import com.jme3.material.Material;
-import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.Client;
 import com.jme3.network.Server;
 import com.jme3.scene.Geometry;
-import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
@@ -90,40 +85,21 @@ import com.undebugged.heraldry.network.SyncMessageValidator;
  * running on server, used to apply network data on client and server.
  * @author normenhansen
  */
-public class WorldManager extends AbstractAppState implements SyncMessageValidator {
+public abstract class WorldManager extends AbstractAppState implements SyncMessageValidator {
 
-    private Server server;
-    private Client client;
-    private long myPlayerId = -2;
-    private long myGroupId = -2;
+    protected long myPlayerId = -2;
+    protected long myGroupId = -2;
     //private NavMesh navMesh = new NavMesh();
-    private Node rootNode;
-    private Node worldRoot;
-    private HashMap<Long, Spatial> entities = new HashMap<Long, Spatial>();
-    private int newId = 0;
-    private Application app;
-    private AssetManager assetManager;
+    protected Node rootNode;
+    protected Node worldRoot;
+    protected HashMap<Long, Spatial> entities = new HashMap<Long, Spatial>();
+    protected int newId = 0;
+    protected Application app;
+    protected AssetManager assetManager;
     //private NavMeshGenerator generator = new NavMeshGenerator();
-    private PhysicsSpace space;
-    private List<Control> userControls = new LinkedList<Control>();
-    private PhysicsSyncManager syncManager;
-
-    public WorldManager(Application app, Node rootNode) {
-        this.app = app;
-        this.rootNode = rootNode;
-        this.assetManager = app.getAssetManager();
-        this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
-        this.server = app.getStateManager().getState(PhysicsSyncManager.class).getServer();
-        syncManager = app.getStateManager().getState(PhysicsSyncManager.class);
-    }
-
-    public boolean isServer() {
-        return server != null;
-    }
-
-    public void setServer(Server server) {
-        this.server = server;
-    }
+    protected PhysicsSpace space;
+    protected List<Control> userControls = new LinkedList<Control>();
+    protected PhysicsSyncManager syncManager;
 
     /**
      * adds a control to the list of controls that are added to the spatial
@@ -140,14 +116,6 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
 
     public void setMyPlayerId(long myPlayerId) {
         this.myPlayerId = myPlayerId;
-    }
-
-    public long getMyGroupId() {
-        return myGroupId;
-    }
-
-    public void setMyGroupId(long myGroupId) {
-        this.myGroupId = myGroupId;
     }
 
     /**
@@ -186,26 +154,7 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      * detaches the level and clears the cache
      */
     public void closeLevel() {
-        for (Iterator<PlayerData> it = PlayerData.getPlayers().iterator(); it.hasNext();) {
-            PlayerData playerData = it.next();
-            playerData.setData("entity_id", -1l);
-        }
-        if (isServer()) {
-            for (Iterator<PlayerData> it = PlayerData.getAIPlayers().iterator(); it.hasNext();) {
-                PlayerData playerData = it.next();
-                removePlayer(playerData.getId());
-            }
-        }
-        for (Iterator<Long> et = new LinkedList(entities.keySet()).iterator(); et.hasNext();) {
-            Long entry = et.next();
-            syncManager.removeObject(entry);
-        }
-        syncManager.clearObjects();
-        entities.clear();
-        newId = 0;
-        space.removeAll(worldRoot);
-        rootNode.detachChild(worldRoot);
-        ((DesktopAssetManager) assetManager).clearCache();
+
     }
 
     /**
@@ -285,9 +234,6 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      */
     public void addPlayer(long id, int groupId, String name, int aiId) {
         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Adding player: {0}", id);
-        if (isServer()) {
-            syncManager.broadcast(new ServerAddPlayerMessage(id, name, groupId, aiId));
-        }
         PlayerData player = null;
         player = new PlayerData(id, groupId, name, aiId);
         PlayerData.add(id, player);
@@ -299,16 +245,6 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      */
     public void removePlayer(long id) {
         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Removing player: {0}", id);
-        if (isServer()) {
-            //TODO: remove other (AI) entities if this is a human client..
-            syncManager.broadcast(new ServerRemovePlayerMessage(id));
-            long entityId = PlayerData.getLongData(id, "entity_id");
-            if (entityId != -1) {
-                enterEntity(id, -1);
-            }
-            long characterId = PlayerData.getLongData(id, "character_entity_id");
-            removeEntity(characterId);
-        }
         PlayerData.remove(id);
     }
 
@@ -395,10 +331,6 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      */
     public void addEntity(long id, String modelIdentifier, Vector3f location, Quaternion rotation) {
         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Adding entity: {0}", id);
-        if (isServer()) {
-            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Broadcast adding entity: {0}", id);
-            syncManager.broadcast(new ServerAddEntityMessage(id, modelIdentifier, location, rotation));
-        }
         Node entityModel = (Node) assetManager.loadModel(modelIdentifier);
         setEntityTranslation(entityModel, location, rotation);
         if (entityModel.getControl(CharacterControl.class) != null) {
@@ -416,17 +348,21 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
         worldRoot.attachChild(entityModel);
     }
 
-    /**
+    public long getMyGroupId() {
+		return myGroupId;
+	}
+
+	public void setMyGroupId(long myGroupId) {
+		this.myGroupId = myGroupId;
+	}
+
+	/**
      * removes the entity with the specified id, exits player if inside
      * (sends message if server)
      * @param id
      */
     public void removeEntity(long id) {
         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Removing entity: {0}", id);
-        if (isServer()) {
-            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Broadcast removing entity: {0}", id);
-            syncManager.broadcast(new ServerRemoveEntityMessage(id));
-        }
         syncManager.removeObject(id);
         Spatial spat = entities.remove(id);
         if (spat == null) {
@@ -452,10 +388,6 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      */
     public void disableEntity(long id) {
         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Disabling entity: {0}", id);
-        if (isServer()) {
-            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Broadcast removing entity: {0}", id);
-            syncManager.broadcast(new ServerDisableEntityMessage(id));
-        }
         Spatial spat = getEntity(id);
         spat.removeFromParent();
         space.removeAll(spat);
@@ -469,10 +401,6 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      */
     public void enableEntity(long id, Vector3f location, Quaternion rotation) {
         Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Enabling entity: {0}", id);
-        if (isServer()) {
-            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Broadcast removing entity: {0}", id);
-            syncManager.broadcast(new ServerEnableEntityMessage(id, location, rotation));
-        }
         Spatial spat = getEntity(id);
         setEntityTranslation(spat, location, rotation);
         worldRoot.attachChild(spat);
@@ -485,7 +413,7 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      * @param location
      * @param rotation
      */
-    private void setEntityTranslation(Spatial entityModel, Vector3f location, Quaternion rotation) {
+    protected void setEntityTranslation(Spatial entityModel, Vector3f location, Quaternion rotation) {
         if (entityModel.getControl(RigidBodyControl.class) != null) {
             entityModel.getControl(RigidBodyControl.class).setPhysicsLocation(location);
             entityModel.getControl(RigidBodyControl.class).setPhysicsRotation(rotation.toRotationMatrix());
@@ -502,62 +430,17 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
     }
 
     /**
-     * handle player entering entity (sends message if server)
+     * handle player entering entity
      * @param playerId
      * @param entityId
      */
-    public void enterEntity(long playerId, long entityId) {
-        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Player {0} entering entity {1}", new Object[]{playerId, entityId});
-        if (isServer()) {
-            syncManager.broadcast(new ServerEnterEntityMessage(playerId, entityId));
-        }
-        long curEntity = PlayerData.getLongData(playerId, "entity_id");
-        int groupId = PlayerData.getIntData(playerId, "group_id");
-        //reset current entity
-        if (curEntity != -1) {
-            Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Player {0} exiting current entity {1}", new Object[]{playerId, curEntity});
-            Spatial curEntitySpat = getEntity(curEntity);
-            curEntitySpat.setUserData("player_id", -1l);
-            curEntitySpat.setUserData("group_id", -1);
-            removeTransientControls(curEntitySpat);
-            removeAIControls(curEntitySpat);
-            if (playerId == myPlayerId) {
-                removeUserControls(curEntitySpat);
-            }
-        }
-        PlayerData.setData(playerId, "entity_id", entityId);
-        //if we entered an entity, configure its controls, id -1 means enter no entity
-        if (entityId != -1) {
-            Spatial spat = getEntity(entityId);
-            spat.setUserData("player_id", playerId);
-            spat.setUserData("group_id", groupId);
-            if (PlayerData.isHuman(playerId)) {
-                if (groupId == getMyGroupId()) { //only true on clients
-                    makeManualControl(entityId, client);
-                    //move controls for local user to new spatial
-                    if (playerId == getMyPlayerId()) {
-                        addUserControls(spat);
-                    }
-                } else {
-                    makeManualControl(entityId, null);
-                }
-            } else {
-                if (groupId == getMyGroupId()) { //only true on clients
-                    makeAutoControl(entityId, client);
-                    addAIControls(playerId, entityId);
-                } else {
-                    makeAutoControl(entityId, null);
-                }
-            }
-
-        }
-    }
-
+    public abstract void enterEntity(long playerId, long entityId);
+    
     /**
      * makes the specified entity ready to be manually controlled by adding
      * a ManualControl based on the entity type (vehicle etc)
      */
-    private void makeManualControl(long entityId, Client client) {
+    protected void makeManualControl(long entityId, Client client) {
         Spatial spat = getEntity(entityId);
         if (spat.getControl(CharacterControl.class) != null) {
             Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Make manual character control for entity {0} ", entityId);
@@ -592,7 +475,7 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      * makes the specified entity ready to be controlled by an AIControl
      * by adding an AutonomousControl based on entity type.
      */
-    private void makeAutoControl(long entityId, Client client) {
+    protected void makeAutoControl(long entityId, Client client) {
         Spatial spat = getEntity(entityId);
         if (spat.getControl(CharacterControl.class) != null) {
             Logger.getLogger(this.getClass().getName())
@@ -618,7 +501,7 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      * spatial
      * @param spat
      */
-    private void removeTransientControls(Spatial spat) {
+    protected void removeTransientControls(Spatial spat) {
         ManualControl manualControl = spat.getControl(ManualControl.class);
         if (manualControl != null) {
             spat.removeControl(manualControl);
@@ -632,7 +515,7 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
     /**
      * adds the user controls for human user to the spatial
      */
-    private void addUserControls(Spatial spat) {
+    protected void addUserControls(Spatial spat) {
         for (Iterator<Control> it = userControls.iterator(); it.hasNext();) {
             Control control = it.next();
             spat.addControl(control);
@@ -642,7 +525,7 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
     /**
      * removes the user controls for human user to the spatial
      */
-    private void removeUserControls(Spatial spat) {
+    protected void removeUserControls(Spatial spat) {
         for (Iterator<Control> it = userControls.iterator(); it.hasNext();) {
             Control control = it.next();
             spat.removeControl(control);
@@ -652,7 +535,7 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
     /**
      * adds the command queue and triggers for user controlled ai entities
      */
-    private void addAIControls(long playerId, long entityId) {
+    protected void addAIControls(long playerId, long entityId) {
         //TODO: use stored controls for playerId
         Spatial spat = getEntity(entityId);
         spat.addControl(new CommandControl(this, playerId, entityId));
@@ -664,7 +547,7 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
     /**
      * removes the command queue and triggers for user controlled ai entities
      */
-    private void removeAIControls(Spatial spat) {
+    protected void removeAIControls(Spatial spat) {
         CommandControl aiControl = spat.getControl(CommandControl.class);
         if (aiControl != null) {
             spat.removeControl(aiControl);
@@ -683,9 +566,6 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      * @param data
      */
     public void setEntityUserData(long id, String name, Object data) {
-        if (isServer()) {
-            syncManager.broadcast(new ServerEntityDataMessage(id, name, data));
-        }
         getEntity(id).setUserData(name, data);
     }
 
@@ -696,23 +576,6 @@ public class WorldManager extends AbstractAppState implements SyncMessageValidat
      * @param channel
      */
     public void playEntityAnimation(long entityId, String animationName, int channel) {
-    }
-
-    public void playWorldEffect(String effectName, Vector3f location, float time) {
-        Quaternion rotation = new Quaternion();
-        playWorldEffect(-1, effectName, location, rotation, location, rotation, time);
-    }
-
-    public void playWorldEffect(String effectName, Vector3f location, Quaternion rotation, float time) {
-        playWorldEffect(-1, effectName, location, rotation, location, rotation, time);
-    }
-
-    public void playWorldEffect(long id, String effectName, Vector3f location, Quaternion rotation, float time) {
-        playWorldEffect(id, effectName, location, rotation, location, rotation, time);
-    }
-
-    public void playWorldEffect(long id, String effectName, Vector3f location, Quaternion rotation, Vector3f endLocation, Quaternion endRotation, float time) {
-        syncManager.broadcast(new ServerEffectMessage(id, effectName, location, rotation, endLocation, endRotation, time));
     }
 
     /**

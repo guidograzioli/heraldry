@@ -11,7 +11,7 @@ import com.jme3.network.MessageListener;
 import com.undebugged.heraldry.messages.PhysicsSyncMessage;
 import com.undebugged.heraldry.network.PhysicsSyncManager;
 
-public abstract class ClientPhysicsSyncManager extends PhysicsSyncManager implements MessageListener<MessageConnection> {
+public class ClientPhysicsSyncManager extends PhysicsSyncManager implements MessageListener<MessageConnection> {
 
 	private Client client;
 	Application app;

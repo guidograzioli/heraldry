@@ -29,57 +29,26 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package com.undebugged.heraldry.controls;
+package com.undebugged.heraldry.messages;
 
-import java.io.IOException;
-
-import com.jme3.export.JmeExporter;
-import com.jme3.export.JmeImporter;
-import com.jme3.renderer.RenderManager;
-import com.jme3.renderer.ViewPort;
-import com.jme3.scene.Spatial;
-import com.jme3.scene.control.Control;
-import com.undebugged.heraldry.core.WorldManager;
-
+import com.jme3.network.AbstractMessage;
+import com.jme3.network.serializing.Serializable;
 
 /**
- * This class implements NavigationControl but actually extends Pathfinder which
- * uses the NavMesh, you can replace it with any Pathfinding system. It will
- * be used by the AutonomousControl then.
+ * sent from client to join server
  * @author normenhansen
  */
-public class NavMeshNavigationControl extends NavMeshPathfinder implements NavigationControl{
+@Serializable()
+public class ClientJoinMessage extends AbstractMessage{
+    public String name;
+    public String pass;
 
-    public NavMeshNavigationControl(WorldManager world) {
-        super(world.getNavMesh());
+    public ClientJoinMessage() {
     }
 
-    public void setSpatial(Spatial spatial) {
-    }
-
-    public void setEnabled(boolean enabled) {
-    }
-
-    public boolean isEnabled() {
-        return true;
-    }
-
-    public void update(float tpf) {
-    }
-
-    public void render(RenderManager rm, ViewPort vp) {
-    }
-
-    public Control cloneForSpatial(Spatial spatial) {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    public void write(JmeExporter ex) throws IOException {
-        throw new UnsupportedOperationException("Not supported.");
-    }
-
-    public void read(JmeImporter im) throws IOException {
-        throw new UnsupportedOperationException("Not supported.");
+    public ClientJoinMessage(String name, String pass) {
+        this.name = name;
+        this.pass = pass;
     }
 
 }

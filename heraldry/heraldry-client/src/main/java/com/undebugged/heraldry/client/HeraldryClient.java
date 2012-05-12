@@ -1,8 +1,15 @@
 package com.undebugged.heraldry.client;
 
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.jme3.app.SimpleApplication;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.network.Client;
 import com.jme3.network.Network;
 import com.jme3.network.NetworkClient;
 import com.jme3.niftygui.NiftyJmeDisplay;
@@ -11,9 +18,10 @@ import com.jme3.system.AppSettings;
 import com.undebugged.heraldry.controls.DefaultHUDControl;
 import com.undebugged.heraldry.controls.UserInputControl;
 import com.undebugged.heraldry.core.Heraldry;
-import com.undebugged.heraldry.core.WorldManager;
+import com.undebugged.heraldry.core.PlayerData;
 import com.undebugged.heraldry.messages.ActionMessage;
 import com.undebugged.heraldry.messages.AutoControlMessage;
+import com.undebugged.heraldry.messages.ChatMessage;
 import com.undebugged.heraldry.messages.ManualControlMessage;
 import com.undebugged.heraldry.messages.ServerAddEntityMessage;
 import com.undebugged.heraldry.messages.ServerAddPlayerMessage;
@@ -24,9 +32,9 @@ import com.undebugged.heraldry.messages.ServerEnterEntityMessage;
 import com.undebugged.heraldry.messages.ServerEntityDataMessage;
 import com.undebugged.heraldry.messages.ServerRemoveEntityMessage;
 import com.undebugged.heraldry.messages.ServerRemovePlayerMessage;
+import com.undebugged.heraldry.messages.StartGameMessage;
 import com.undebugged.heraldry.messages.SyncCharacterMessage;
 import com.undebugged.heraldry.messages.SyncRigidBodyMessage;
-import com.undebugged.heraldry.network.PhysicsSyncManager;
 
 import de.lessvoid.nifty.Nifty;
 import de.lessvoid.nifty.controls.dynamic.TextCreator;
@@ -35,13 +43,6 @@ import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
 import de.lessvoid.nifty.screen.ScreenController;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The client Main class, also the screen controller for most parts of the
@@ -64,8 +65,8 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
         app.setPauseOnLostFocus(false);
         app.start();
     }
-    private WorldManager worldManager;
-    private PhysicsSyncManager syncManager;
+    private ClientWorldManager worldManager;
+    private ClientPhysicsSyncManager syncManager;
     private ClientEffectsManager effectsManager;
     private Nifty nifty;
     private NiftyJmeDisplay niftyDisplay;
@@ -95,7 +96,7 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
 //        chaseCam.setChasingSensitivity(100);
 //        chaseCam.setTrailingEnabled(true);
 
-        syncManager = new PhysicsSyncManager(app, client);
+        syncManager = new ClientPhysicsSyncManager(app, client);
         syncManager.setMaxDelay(Heraldry.NETWORK_MAX_PHYSICS_DELAY);
         syncManager.setMessageTypes(AutoControlMessage.class,
                 ManualControlMessage.class,
@@ -271,11 +272,7 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
      */
     public void startGame() {
         //TODO: map selection
-        try {
-            client.send(new StartGameMessage("Scenes/MonkeyZone.j3o"));
-        } catch (IOException ex) {
-            Logger.getLogger(HeraldryClient.class.getName()).log(Level.SEVERE, "Cannot send start game message: {0}", ex);
-        }
+           client.send(new StartGameMessage("Scenes/MonkeyZone.j3o"));
     }
 
     /**
@@ -317,7 +314,7 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
                             return null;
                         }
                     }).get();
-                    worldManager.createNavMesh();
+                    //worldManager.createNavMesh();
                     enqueue(new Callable<Void>() {
 
                         public Void call() throws Exception {

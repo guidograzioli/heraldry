@@ -1,4 +1,4 @@
-package org.heraldry.core;
+package com.undebugged.heraldry.core;
 
 
 public class Test {

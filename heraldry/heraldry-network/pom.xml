@@ -21,6 +21,14 @@
 			<artifactId>jME3-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>com.jme3</groupId>
+			<artifactId>jME3-networking</artifactId>
+		</dependency>		
+		<dependency>
+			<groupId>com.jme3</groupId>
+			<artifactId>jME3-jbullet</artifactId>
+		</dependency>		
+		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
 			<scope>test</scope>
