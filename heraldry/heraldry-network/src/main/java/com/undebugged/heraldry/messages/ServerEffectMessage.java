@@ -34,6 +34,7 @@ package com.undebugged.heraldry.messages;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.serializing.Serializable;
+import com.undebugged.heraldry.core.WorldManager;
 
 /**
  * Message sent to play effect on client
@@ -66,7 +67,7 @@ public class ServerEffectMessage extends PhysicsSyncMessage {
 
     @Override
     public void applyData(Object object) {
-        ClientEffectsManager manager = (ClientEffectsManager) object;
-        manager.playEffect(effectId, name, location, endLocation, rotation, endRotation, playTime);
+        WorldManager manager = (WorldManager) object;
+        manager.playClientEffect(effectId, name, location, endLocation, rotation, endRotation, playTime);
     }
 }

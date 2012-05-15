@@ -83,7 +83,8 @@ public class ClientEffectsManager extends AbstractAppState {
      * @param endRotation
      * @param time
      */
-    public void playEffect(long id, String effectName, Vector3f location, Vector3f endLocation, Quaternion rotation, Quaternion endRotation, float time) {
+    public void playEffect(long id, String effectName, Vector3f location, Vector3f endLocation, 
+    		Quaternion rotation, Quaternion endRotation, float time) {
         if (liveEmitters.containsKey(id)) {
             Logger.getLogger(ClientEffectsManager.class.getName()).log(Level.WARNING, "Trying to add effect with existing id");
             return;

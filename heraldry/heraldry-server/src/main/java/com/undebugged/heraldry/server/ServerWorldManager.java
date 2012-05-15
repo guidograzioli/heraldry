@@ -8,7 +8,6 @@ import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.control.CharacterControl;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.network.Server;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.undebugged.heraldry.core.PlayerData;
@@ -25,7 +24,6 @@ import com.undebugged.heraldry.messages.ServerRemovePlayerMessage;
 
 public class ServerWorldManager extends WorldManager {
 
-	private Server server;
 	private ServerPhysicsSyncManager syncManager;
 	
     public ServerWorldManager(Application app, Node rootNode) {
@@ -33,7 +31,6 @@ public class ServerWorldManager extends WorldManager {
         this.rootNode = rootNode;
         this.assetManager = app.getAssetManager();
         this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
-        this.server = app.getStateManager().getState(ServerPhysicsSyncManager.class).getServer();
         syncManager = app.getStateManager().getState(ServerPhysicsSyncManager.class);
     }
     
@@ -50,7 +47,14 @@ public class ServerWorldManager extends WorldManager {
         space.removeAll(spat);
     }
     
-    /**
+    
+    
+    @Override
+	public ServerPhysicsSyncManager getSyncManager() {
+		return syncManager;
+	}
+
+	/**
      * handle player entering entity (sends message if server)
      * @param playerId
      * @param entityId
@@ -66,8 +70,6 @@ public class ServerWorldManager extends WorldManager {
             Spatial curEntitySpat = getEntity(curEntity);
             curEntitySpat.setUserData("player_id", -1l);
             curEntitySpat.setUserData("group_id", -1);
-            removeTransientControls(curEntitySpat);
-            removeAIControls(curEntitySpat);
             if (playerId == myPlayerId) {
                 removeUserControls(curEntitySpat);
             }
@@ -80,8 +82,6 @@ public class ServerWorldManager extends WorldManager {
             spat.setUserData("group_id", groupId);
             if (PlayerData.isHuman(playerId)) {
             	makeManualControl(entityId, null);
-            } else {
-                makeAutoControl(entityId, null);
             }
         }
     }
@@ -102,8 +102,6 @@ public class ServerWorldManager extends WorldManager {
             return;
         }
         Long playerId = (Long) spat.getUserData("player_id");
-        removeTransientControls(spat);
-        removeAIControls(spat);
         if (playerId == myPlayerId) {
             removeUserControls(spat);
         }
@@ -161,8 +159,6 @@ public class ServerWorldManager extends WorldManager {
         Node entityModel = (Node) assetManager.loadModel(modelIdentifier);
         setEntityTranslation(entityModel, location, rotation);
         if (entityModel.getControl(CharacterControl.class) != null) {
-            entityModel.addControl(new CharacterAnimControl());
-            //FIXME: strangeness setting these in jMP..
             entityModel.getControl(CharacterControl.class).setFallSpeed(55);
             entityModel.getControl(CharacterControl.class).setJumpSpeed(15);
         }
@@ -218,4 +214,11 @@ public class ServerWorldManager extends WorldManager {
         syncManager.broadcast(new ServerEntityDataMessage(id, name, data));
         getEntity(id).setUserData(name, data);
     }
+
+	@Override
+	public void playEntityAnimation(long entityId, String animationName, int channel) {}
+
+	@Override
+	public void playClientEffect(long id, String effectName, Vector3f location, Vector3f endLocation,
+			Quaternion rotation, Quaternion endRotation, float time) {}
 }

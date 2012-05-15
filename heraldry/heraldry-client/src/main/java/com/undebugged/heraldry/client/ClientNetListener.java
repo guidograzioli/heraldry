@@ -39,7 +39,6 @@ import com.jme3.network.Client;
 import com.jme3.network.ClientStateListener;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
-import com.jme3.network.NetworkClient;
 import com.undebugged.heraldry.core.Heraldry;
 import com.undebugged.heraldry.core.WorldManager;
 import com.undebugged.heraldry.messages.ChatMessage;

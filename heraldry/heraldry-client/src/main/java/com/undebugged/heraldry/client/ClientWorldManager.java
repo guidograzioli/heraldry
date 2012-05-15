@@ -31,17 +31,17 @@
  */
 package com.undebugged.heraldry.client;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.jme3.app.Application;
 import com.jme3.bullet.BulletAppState;
-import com.jme3.network.Client;
-import com.jme3.scene.Geometry;
+import com.jme3.bullet.control.CharacterControl;
+import com.jme3.math.Quaternion;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.undebugged.heraldry.controls.CharacterAnimControl;
 import com.undebugged.heraldry.core.PlayerData;
 import com.undebugged.heraldry.core.WorldManager;
 import com.undebugged.heraldry.network.PhysicsSyncManager;
@@ -53,15 +53,12 @@ import com.undebugged.heraldry.network.PhysicsSyncManager;
  * @author normenhansen
  */
 public class ClientWorldManager extends WorldManager {
-
-	private Client client;
 	
     public ClientWorldManager(Application app, Node rootNode) {
         this.app = app;
         this.rootNode = rootNode;
         this.assetManager = app.getAssetManager();
         this.space = app.getStateManager().getState(BulletAppState.class).getPhysicsSpace();
-        this.client = app.getStateManager().getState(ClientPhysicsSyncManager.class).getClient();
         syncManager = app.getStateManager().getState(PhysicsSyncManager.class);
     }
 
@@ -85,41 +82,6 @@ public class ClientWorldManager extends WorldManager {
         }
     }
 
-    /**
-     * creates the nav mesh for the loaded level
-     */
-//    public void createNavMesh() {
-//
-//        Mesh mesh = new Mesh();
-//
-//        //version a: from mesh
-//        GeometryBatchFactory.mergeGeometries(findGeometries(worldRoot, new LinkedList<Geometry>()), mesh);
-//        Mesh optiMesh = generator.optimize(mesh);
-//
-//        navMesh.loadFromMesh(optiMesh);
-//
-//        //TODO: navmesh only for debug
-//        Geometry navGeom = new Geometry("NavMesh");
-//        navGeom.setMesh(optiMesh);
-//        Material green = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
-//        green.setColor("Color", ColorRGBA.Green);
-//        green.getAdditionalRenderState().setWireframe(true);
-//        navGeom.setMaterial(green);
-//
-//        worldRoot.attachChild(navGeom);
-//    }
-
-    private List<Geometry> findGeometries(Node node, List<Geometry> geoms) {
-        for (Iterator<Spatial> it = node.getChildren().iterator(); it.hasNext();) {
-            Spatial spatial = it.next();
-            if (spatial instanceof Geometry) {
-                geoms.add((Geometry) spatial);
-            } else if (spatial instanceof Node) {
-                findGeometries((Node) spatial, geoms);
-            }
-        }
-        return geoms;
-    }
 
     /**
      * handle player entering entity (sends message if server)
@@ -136,8 +98,6 @@ public class ClientWorldManager extends WorldManager {
             Spatial curEntitySpat = getEntity(curEntity);
             curEntitySpat.setUserData("player_id", -1l);
             curEntitySpat.setUserData("group_id", -1);
-            removeTransientControls(curEntitySpat);
-            removeAIControls(curEntitySpat);
             if (playerId == myPlayerId) {
                 removeUserControls(curEntitySpat);
             }
@@ -148,27 +108,26 @@ public class ClientWorldManager extends WorldManager {
             Spatial spat = getEntity(entityId);
             spat.setUserData("player_id", playerId);
             spat.setUserData("group_id", groupId);
-            if (PlayerData.isHuman(playerId)) {
-                if (groupId == getMyGroupId()) { //only true on clients
-                    makeManualControl(entityId, client);
-                    //move controls for local user to new spatial
-                    if (playerId == getMyPlayerId()) {
-                        addUserControls(spat);
-                    }
-                } else {
-                    makeManualControl(entityId, null);
-                }
-            } else {
-                if (groupId == getMyGroupId()) { //only true on clients
-                    makeAutoControl(entityId, client);
-                    addAIControls(playerId, entityId);
-                } else {
-                    makeAutoControl(entityId, null);
-                }
-            }
         }
     }
     
+    public void addEntity(long id, String modelIdentifier, Vector3f location, Quaternion rotation) {
+        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Adding entity: {0}", id);
+        Node entityModel = (Node) assetManager.loadModel(modelIdentifier);
+        setEntityTranslation(entityModel, location, rotation);
+        if (entityModel.getControl(CharacterControl.class) != null) {
+            entityModel.addControl(new CharacterAnimControl());
+            entityModel.getControl(CharacterControl.class).setFallSpeed(55);
+            entityModel.getControl(CharacterControl.class).setJumpSpeed(15);
+        }
+        entityModel.setUserData("player_id", -1l);
+        entityModel.setUserData("group_id", -1);
+        entityModel.setUserData("entity_id", id);
+        entities.put(id, entityModel);
+        syncManager.addObject(id, entityModel);
+        space.addAll(entityModel);
+        worldRoot.attachChild(entityModel);
+    }
 
     /**
      * play animation on specified entity
@@ -181,4 +140,10 @@ public class ClientWorldManager extends WorldManager {
 
     @Override
     public void update(float tpf) { }
+
+	@Override
+	public void playClientEffect(long id, String effectName, Vector3f location, Vector3f endLocation, Quaternion rotation, Quaternion endRotation, float time) {
+		ClientEffectsManager manager = app.getStateManager().getState(ClientEffectsManager.class);
+    	manager.playEffect(id, effectName, location, endLocation, rotation, endRotation, time);
+	} 
 }

@@ -43,7 +43,6 @@ import com.jme3.network.MessageListener;
 import com.jme3.network.Server;
 import com.undebugged.heraldry.core.Heraldry;
 import com.undebugged.heraldry.core.PlayerData;
-import com.undebugged.heraldry.core.WorldManager;
 import com.undebugged.heraldry.messages.ActionMessage;
 import com.undebugged.heraldry.messages.ChatMessage;
 import com.undebugged.heraldry.messages.ClientJoinMessage;
@@ -60,10 +59,10 @@ public class ServerNetListener implements MessageListener<HostedConnection>, Con
 
     HeraldryServer app;
     com.jme3.network.Server server;
-    WorldManager worldManager;
+    ServerWorldManager worldManager;
     ServerGameManager gameManager;
 
-    public ServerNetListener(HeraldryServer app, Server server, WorldManager worldManager, 
+    public ServerNetListener(HeraldryServer app, Server server, ServerWorldManager worldManager, 
     		ServerGameManager gameManager) {
         this.server = server;
         this.worldManager = worldManager;

@@ -42,8 +42,6 @@ import java.util.logging.Logger;
 import com.jme3.app.Application;
 import com.jme3.app.state.AbstractAppState;
 import com.jme3.asset.AssetManager;
-import com.jme3.asset.DesktopAssetManager;
-import com.jme3.bullet.BulletAppState;
 import com.jme3.bullet.PhysicsSpace;
 import com.jme3.bullet.collision.PhysicsCollisionObject;
 import com.jme3.bullet.collision.PhysicsRayTestResult;
@@ -54,28 +52,13 @@ import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.network.Client;
-import com.jme3.network.Server;
-import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.Control;
-import com.undebugged.heraldry.controls.AutonomousCharacterControl;
-import com.undebugged.heraldry.controls.AutonomousControl;
-import com.undebugged.heraldry.controls.AutonomousVehicleControl;
 import com.undebugged.heraldry.controls.ManualCharacterControl;
-import com.undebugged.heraldry.controls.ManualControl;
 import com.undebugged.heraldry.controls.ManualVehicleControl;
 import com.undebugged.heraldry.controls.MovementControl;
 import com.undebugged.heraldry.messages.PhysicsSyncMessage;
-import com.undebugged.heraldry.messages.ServerAddEntityMessage;
-import com.undebugged.heraldry.messages.ServerAddPlayerMessage;
-import com.undebugged.heraldry.messages.ServerDisableEntityMessage;
-import com.undebugged.heraldry.messages.ServerEffectMessage;
-import com.undebugged.heraldry.messages.ServerEnableEntityMessage;
-import com.undebugged.heraldry.messages.ServerEnterEntityMessage;
-import com.undebugged.heraldry.messages.ServerEntityDataMessage;
-import com.undebugged.heraldry.messages.ServerRemoveEntityMessage;
-import com.undebugged.heraldry.messages.ServerRemovePlayerMessage;
 import com.undebugged.heraldry.network.PhysicsSyncManager;
 import com.undebugged.heraldry.network.SyncMessageValidator;
 
@@ -200,18 +183,6 @@ public abstract class WorldManager extends AbstractAppState implements SyncMessa
         rootNode.attachChild(worldRoot);
     }
 
-    private List<Geometry> findGeometries(Node node, List<Geometry> geoms) {
-        for (Iterator<Spatial> it = node.getChildren().iterator(); it.hasNext();) {
-            Spatial spatial = it.next();
-            if (spatial instanceof Geometry) {
-                geoms.add((Geometry) spatial);
-            } else if (spatial instanceof Node) {
-                findGeometries((Node) spatial, geoms);
-            }
-        }
-        return geoms;
-    }
-
     /**
      * adds a new player with new id (used on server only)
      * @param id
@@ -329,24 +300,7 @@ public abstract class WorldManager extends AbstractAppState implements SyncMessa
      * @param location
      * @param rotation
      */
-    public void addEntity(long id, String modelIdentifier, Vector3f location, Quaternion rotation) {
-        Logger.getLogger(this.getClass().getName()).log(Level.INFO, "Adding entity: {0}", id);
-        Node entityModel = (Node) assetManager.loadModel(modelIdentifier);
-        setEntityTranslation(entityModel, location, rotation);
-        if (entityModel.getControl(CharacterControl.class) != null) {
-            entityModel.addControl(new CharacterAnimControl());
-            //FIXME: strangeness setting these in jMP..
-            entityModel.getControl(CharacterControl.class).setFallSpeed(55);
-            entityModel.getControl(CharacterControl.class).setJumpSpeed(15);
-        }
-        entityModel.setUserData("player_id", -1l);
-        entityModel.setUserData("group_id", -1);
-        entityModel.setUserData("entity_id", id);
-        entities.put(id, entityModel);
-        syncManager.addObject(id, entityModel);
-        space.addAll(entityModel);
-        worldRoot.attachChild(entityModel);
-    }
+    public abstract void addEntity(long id, String modelIdentifier, Vector3f location, Quaternion rotation);
 
     public long getMyGroupId() {
 		return myGroupId;
@@ -370,8 +324,6 @@ public abstract class WorldManager extends AbstractAppState implements SyncMessa
             return;
         }
         Long playerId = (Long) spat.getUserData("player_id");
-        removeTransientControls(spat);
-        removeAIControls(spat);
         if (playerId == myPlayerId) {
             removeUserControls(spat);
         }
@@ -471,46 +423,6 @@ public abstract class WorldManager extends AbstractAppState implements SyncMessa
         }
     }
 
-    /**
-     * makes the specified entity ready to be controlled by an AIControl
-     * by adding an AutonomousControl based on entity type.
-     */
-    protected void makeAutoControl(long entityId, Client client) {
-        Spatial spat = getEntity(entityId);
-        if (spat.getControl(CharacterControl.class) != null) {
-            Logger.getLogger(this.getClass().getName())
-            	.log(Level.INFO, "Make autonomous character control for entity {0} ", entityId);
-            if (client != null) {
-                spat.addControl(new AutonomousCharacterControl(client, entityId));
-            } else {
-                spat.addControl(new AutonomousCharacterControl());
-            }
-        } else if (spat.getControl(VehicleControl.class) != null) {
-            Logger.getLogger(this.getClass().getName())
-            	.log(Level.INFO, "Make autonomous vehicle control for entity {0} ", entityId);
-            if (client != null) {
-                spat.addControl(new AutonomousVehicleControl(client, entityId));
-            } else {
-                spat.addControl(new AutonomousVehicleControl());
-            }
-        }
-    }
-
-    /**
-     * removes all movement controls (ManualControl / AutonomousControl) from
-     * spatial
-     * @param spat
-     */
-    protected void removeTransientControls(Spatial spat) {
-        ManualControl manualControl = spat.getControl(ManualControl.class);
-        if (manualControl != null) {
-            spat.removeControl(manualControl);
-        }
-        AutonomousControl autoControl = spat.getControl(AutonomousControl.class);
-        if (autoControl != null) {
-            spat.removeControl(autoControl);
-        }
-    }
 
     /**
      * adds the user controls for human user to the spatial
@@ -533,33 +445,6 @@ public abstract class WorldManager extends AbstractAppState implements SyncMessa
     }
 
     /**
-     * adds the command queue and triggers for user controlled ai entities
-     */
-    protected void addAIControls(long playerId, long entityId) {
-        //TODO: use stored controls for playerId
-        Spatial spat = getEntity(entityId);
-        spat.addControl(new CommandControl(this, playerId, entityId));
-//        Command command = new AttackCommand();
-        SphereTrigger trigger = new SphereTrigger(this);
-        spat.addControl(trigger);
-    }
-
-    /**
-     * removes the command queue and triggers for user controlled ai entities
-     */
-    protected void removeAIControls(Spatial spat) {
-        CommandControl aiControl = spat.getControl(CommandControl.class);
-        if (aiControl != null) {
-            spat.removeControl(aiControl);
-        }
-        TriggerControl triggerControl = spat.getControl(TriggerControl.class);
-        while (triggerControl != null) {
-            spat.removeControl(triggerControl);
-            triggerControl = spat.getControl(TriggerControl.class);
-        }
-    }
-
-    /**
      * set user data of specified entity (sends message if server)
      * @param id
      * @param name
@@ -575,8 +460,9 @@ public abstract class WorldManager extends AbstractAppState implements SyncMessa
      * @param animationName
      * @param channel
      */
-    public void playEntityAnimation(long entityId, String animationName, int channel) {
-    }
+    public abstract void playEntityAnimation(long entityId, String animationName, int channel);
+    
+    public abstract void playClientEffect(long id, String effectName, Vector3f location, Vector3f endLocation, Quaternion rotation, Quaternion endRotation, float time);
 
     /**
      * does a ray test that starts at the entity location and extends in its

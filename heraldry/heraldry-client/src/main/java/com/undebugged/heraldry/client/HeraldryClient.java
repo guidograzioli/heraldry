@@ -242,7 +242,9 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
      */
     public void connect() {
         //TODO: not connect when already trying..
-        final String userName = nifty.getScreen("load_game").findElementByName("layer").findElementByName("panel").findElementByName("username_text").getControl(TextFieldControl.class).getText();
+        final String userName = nifty.getScreen("load_game").findElementByName("layer")
+        		.findElementByName("panel").findElementByName("username_text")
+        		.getControl(TextFieldControl.class).getText();
         if (userName.trim().length() == 0) {
             setStatusText("Username invalid");
             return;

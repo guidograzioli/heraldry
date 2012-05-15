@@ -43,7 +43,6 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Spatial;
 import com.undebugged.heraldry.core.PlayerData;
-import com.undebugged.heraldry.core.WorldManager;
 import com.undebugged.heraldry.messages.ActionMessage;
 import com.undebugged.heraldry.messages.StartGameMessage;
 
@@ -54,7 +53,7 @@ import com.undebugged.heraldry.messages.StartGameMessage;
 public class ServerGameManager extends AbstractAppState {
 
     ServerPhysicsSyncManager server;
-    WorldManager worldManager;
+    ServerWorldManager worldManager;
     private boolean running;
     String mapName;
     String[] modelNames;
@@ -62,7 +61,7 @@ public class ServerGameManager extends AbstractAppState {
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager, app);
-        this.worldManager = app.getStateManager().getState(WorldManager.class);
+        this.worldManager = app.getStateManager().getState(ServerWorldManager.class);
         this.server = (ServerPhysicsSyncManager) worldManager.getSyncManager();
     }
 
