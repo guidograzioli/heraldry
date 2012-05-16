@@ -3,6 +3,7 @@ package com.undebugged.heraldry.core;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.jme3.network.message.DisconnectMessage;
 import com.jme3.network.serializing.Serializer;
 import com.undebugged.heraldry.messages.ActionMessage;
 import com.undebugged.heraldry.messages.AutoControlMessage;
@@ -62,6 +63,7 @@ public class Heraldry {
 
     public static void registerSerializers() {
         Serializer.registerClass(ActionMessage.class);
+        Serializer.registerClass(DisconnectMessage.class);
         Serializer.registerClass(AutoControlMessage.class);
         Serializer.registerClass(ChatMessage.class);
         Serializer.registerClass(ClientJoinMessage.class);

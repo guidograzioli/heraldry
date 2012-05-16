@@ -79,7 +79,7 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
     @Override
     public void simpleInitApp() {
         startNifty();
-        client = Network.createClient();
+        client = Network.createClient(Heraldry.VERSION, Heraldry.PROTOCOL_VERSION);
         bulletState = new BulletAppState();
         if (Heraldry.PHYSICS_THREADED) {
             bulletState.setThreadingType(BulletAppState.ThreadingType.PARALLEL);
@@ -115,6 +115,9 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
         stateManager.attach(syncManager);
 
         //world manager, manages entites and server commands
+        //commandControl = new UserCommandControl(nifty.getScreen("default_hud"), inputManager);
+        //world manager, manages entites and server commands
+        worldManager = new ClientWorldManager(this, rootNode);
         worldManager.addUserControl(new UserInputControl(inputManager, cam));
         worldManager.addUserControl(new DefaultHUDControl(nifty.getScreen("default_hud")));
         //register effects manager with sync manager so that messages can apply their data
@@ -126,6 +129,7 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
         effectsManager = new ClientEffectsManager();
         stateManager.attach(effectsManager);
         
+        syncManager.addObject(-2, effectsManager);
         listenerManager = new ClientNetListener(this, client, worldManager, effectsManager);
     }
 
@@ -252,7 +256,8 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
         listenerManager.setName(userName);
         statusText.setText("Connecting..");
         try {
-            client.connectToServer(Heraldry.DEFAULT_SERVER, Heraldry.DEFAULT_PORT_TCP, Heraldry.DEFAULT_PORT_UDP);
+            client.connectToServer(Heraldry.DEFAULT_SERVER, 
+            		Heraldry.DEFAULT_PORT_TCP, Heraldry.DEFAULT_PORT_UDP);
             client.start();
         } catch (IOException ex) {
             setStatusText(ex.getMessage());

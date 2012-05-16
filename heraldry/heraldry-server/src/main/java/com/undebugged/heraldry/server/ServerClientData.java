@@ -52,7 +52,7 @@ public class ServerClientData {
         players.remove(id);
     }
 
-    public static synchronized boolean exsists(int id) {
+    public static synchronized boolean exists(int id) {
         return players.containsKey(id);
     }
 

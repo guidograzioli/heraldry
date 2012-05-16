@@ -12,26 +12,9 @@
 	<packaging>jar</packaging>
 	<name>heraldry-server</name>
 	<url>http://heraldry.undebugged.com</url>
-
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-
-	<build>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.4</version>
-				<configuration>
-					<source>1.6</source>
-					<target>1.6</target>
-				</configuration>
-			</plugin>
-		</plugins>
-
-	</build>
-
 	<dependencies>
 		<dependency>
 			<groupId>com.undebugged</groupId>
@@ -45,6 +28,10 @@
 		<dependency>
 			<groupId>com.jme3</groupId>
 			<artifactId>jME3-jbullet</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.jme3</groupId>
+			<artifactId>jME3-desktop</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.jme3</groupId>

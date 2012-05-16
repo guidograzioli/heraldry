@@ -75,7 +75,7 @@ public class ServerNetListener implements MessageListener<HostedConnection>, Con
 
     public void connectionAdded(Server serverr, HostedConnection client) {
         int clientId = (int) client.getId();
-        if (!ServerClientData.exsists(clientId)) {
+        if (!ServerClientData.exists(clientId)) {
             ServerClientData.add(clientId);
         } else {
             Logger.getLogger(ServerNetListener.class.getName()).log(Level.SEVERE, "Client ID exists!");
@@ -119,7 +119,7 @@ public class ServerNetListener implements MessageListener<HostedConnection>, Con
             Logger.getLogger(ServerNetListener.class.getName()).log(Level.INFO, "Got client join message");
             final int clientId = (int) source.getId();
             //TODO: login user/pass check
-            if (!ServerClientData.exsists(clientId)) {
+            if (!ServerClientData.exists(clientId)) {
                 Logger.getLogger(ServerNetListener.class.getName()).log(Level.WARNING, "Receiving join message from unknown client");
                 return;
             }
@@ -190,7 +190,7 @@ public class ServerNetListener implements MessageListener<HostedConnection>, Con
      * @return
      */
     private boolean checkClient(int clientId, Message message) {
-        if (ServerClientData.exsists(clientId) && ServerClientData.isConnected(clientId)) {
+        if (ServerClientData.exists(clientId) && ServerClientData.isConnected(clientId)) {
             return true;
         } else {
             Logger.getLogger(ServerNetListener.class.getName()).log(Level.WARNING, "Invalid client, reject data from client {0}", clientId);

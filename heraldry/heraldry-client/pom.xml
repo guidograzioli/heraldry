@@ -22,6 +22,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.undebugged</groupId>
+			<artifactId>heraldry-data</artifactId>
+			<version>${project.version}</version>
+		</dependency>		
+		<dependency>
 			<groupId>com.jme3</groupId>
 			<artifactId>jME3-core</artifactId>
 		</dependency>
@@ -31,24 +36,20 @@
 		</dependency>
 		<dependency>
 			<groupId>com.jme3</groupId>
+			<artifactId>jME3-desktop</artifactId>
+		</dependency>		
+		<dependency>
+			<groupId>com.jme3</groupId>
 			<artifactId>jME3-niftygui</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.jme3</groupId>
-			<artifactId>nifty</artifactId>
-		</dependency>
+			<artifactId>nifty-default-controls</artifactId>
+		</dependency>		
 		<dependency>
 			<groupId>com.jme3</groupId>
-			<artifactId>nifty-default-controls</artifactId>
-		</dependency>
-      <dependency>
-        <groupId>com.jme3</groupId>
-        <artifactId>nifty-examples</artifactId>
-      </dependency>
-      <dependency>
-        <groupId>com.jme3</groupId>
-        <artifactId>nifty-style-black</artifactId>
-      </dependency>		
+			<artifactId>jME3-lwjgl</artifactId>
+		</dependency>		
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

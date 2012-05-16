@@ -74,7 +74,7 @@ public class ClientNetListener implements MessageListener<Object>, ClientStateLi
 
     public void clientConnected(Client clienst) {
         setStatusText("Requesting login..");
-        HandshakeMessage msg = new HandshakeMessage(Heraldry.PROTOCOL_VERSION, Heraldry.CLIENT_VERSION, -1);
+        HandshakeMessage msg = new HandshakeMessage(Heraldry.PROTOCOL_VERSION, Heraldry.CLIENT_VERSION, Heraldry.SERVER_VERSION);
         client.send(msg);
         Logger.getLogger(ClientNetListener.class.getName()).log(Level.INFO, "Sent handshake message");
     }

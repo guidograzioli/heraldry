@@ -30,6 +30,8 @@ public class HeraldryServer extends SimpleApplication {
         settings.setFrameRate(Heraldry.SCENE_FPS);
         settings.setRenderer(null);
         settings.setAudioRenderer(null);
+        Heraldry.registerSerializers();
+        Heraldry.setLogLevels(true);       
 		app = new HeraldryServer();
 		app.setShowSettings(false);
         app.setPauseOnLostFocus(false);
@@ -41,7 +43,7 @@ public class HeraldryServer extends SimpleApplication {
 	public void simpleInitApp() {
 		try {
 			server = Network.createServer(
-					Heraldry.VERSION, Network.DEFAULT_VERSION, 
+					Heraldry.VERSION, Heraldry.PROTOCOL_VERSION, 
 					Heraldry.DEFAULT_PORT_TCP, Heraldry.DEFAULT_PORT_UDP);
 			server.start();
 		} catch (IOException e) {
