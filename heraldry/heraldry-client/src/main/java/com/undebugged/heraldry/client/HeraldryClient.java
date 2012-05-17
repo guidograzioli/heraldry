@@ -37,8 +37,8 @@ import com.undebugged.heraldry.messages.SyncCharacterMessage;
 import com.undebugged.heraldry.messages.SyncRigidBodyMessage;
 
 import de.lessvoid.nifty.Nifty;
+import de.lessvoid.nifty.controls.TextField;
 import de.lessvoid.nifty.controls.dynamic.TextCreator;
-import de.lessvoid.nifty.controls.textfield.TextFieldControl;
 import de.lessvoid.nifty.elements.Element;
 import de.lessvoid.nifty.elements.render.TextRenderer;
 import de.lessvoid.nifty.screen.Screen;
@@ -56,7 +56,7 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
     public static void main(String[] args) {
         AppSettings settings = new AppSettings(true);
         settings.setFrameRate(Heraldry.SCENE_FPS);
-        settings.setSettingsDialogImage("/Interface/Images/splash-small.jpg");
+        settings.setSettingsDialogImage("/Interface/Images/cop4.png");
         settings.setTitle("Heraldry");
         Heraldry.registerSerializers();
         Heraldry.setLogLevels(true);
@@ -149,8 +149,7 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-        statusText = nifty.getScreen("load_game").findElementByName("layer")
-        		.findElementByName("panel").findElementByName("status_text")
+        statusText = nifty.getScreen("load_game").findElementByName("status_text")
         		.getRenderer(TextRenderer.class);
         guiViewPort.addProcessor(niftyDisplay);
     }
@@ -209,7 +208,7 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
 
             public Void call() throws Exception {
                 Screen screen = nifty.getScreen("lobby");
-                Element panel = screen.findElementByName("layer").findElementByName("bottom_panel").findElementByName("chat_panel").findElementByName("chat_list").findElementByName("chat_list_panel");
+                Element panel = screen.findElementByName("chat_list_panel");
                 TextCreator labelCreator = new TextCreator(text);
                 labelCreator.setStyle("my-listbox-item-style");
                 labelCreator.create(nifty, screen, panel);
@@ -227,7 +226,7 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
 
             public Void call() throws Exception {
                 Screen screen = nifty.getScreen("lobby");
-                TextFieldControl control = screen.findElementByName("layer").findElementByName("bottom_panel").findElementByName("chat_panel").findElementByName("chat_bottom_bar").findElementByName("chat_text").getControl(TextFieldControl.class);
+                TextField control = screen.findNiftyControl("chat_text",TextField.class);
                 String text = control.getText();
                 sendMessage(text);
                 control.setText("");
@@ -246,15 +245,21 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
      */
     public void connect() {
         //TODO: not connect when already trying..
-        final String userName = nifty.getScreen("load_game").findElementByName("layer")
-        		.findElementByName("panel").findElementByName("username_text")
-        		.getControl(TextFieldControl.class).getText();
+        final String userName = nifty.getCurrentScreen()
+        		.findNiftyControl("username_text",TextField.class).getText();
         if (userName.trim().length() == 0) {
             setStatusText("Username invalid");
             return;
         }
+        final String passWord = nifty.getCurrentScreen()
+        		.findNiftyControl("password_text",TextField.class).getText();
+        if (passWord.trim().length() == 0) {
+            setStatusText("Password invalid");
+            return;
+        }
         listenerManager.setName(userName);
-        statusText.setText("Connecting..");
+        listenerManager.setPass(passWord);
+        setStatusText("Connecting...");
         try {
             client.connectToServer(Heraldry.DEFAULT_SERVER, 
             		Heraldry.DEFAULT_PORT_TCP, Heraldry.DEFAULT_PORT_UDP);
@@ -289,7 +294,8 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
      * @param modelNames
      */
     public void loadLevel(final String name, final String[] modelNames) {
-        final TextRenderer statusText = nifty.getScreen("load_level").findElementByName("layer").findElementByName("panel").findElementByName("status_text").getRenderer(TextRenderer.class);
+        final TextRenderer statusText = nifty.getScreen("load_level")
+        		.findElementByName("status_text").getRenderer(TextRenderer.class);
         if (name.equals("null")) {
             enqueue(new Callable<Void>() {
 
@@ -365,6 +371,11 @@ public class HeraldryClient extends SimpleApplication implements ScreenControlle
     public void simpleRender(RenderManager rm) {
     }
 
+    public void quit() {
+        app.stop(); 
+      }
+    
+    
     @Override
     public void destroy() {
         try {

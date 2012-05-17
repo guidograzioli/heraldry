@@ -9,39 +9,51 @@
     </style>
     
     <screen id="null" controller="com.undebugged.heraldry.client.HeraldryClient">
+    	<layer id="nulllayer"/>
     </screen>
 
     <screen id="load_game" controller="com.undebugged.heraldry.client.HeraldryClient">
-        <layer id="layer" childLayout="center">
-            <panel id="panel" height="300px" width="350px" align="center" valign="center" style="nifty-panel" childLayout="vertical">
+        <layer id="layer" childLayout="vertical">
+            <panel id="titlepanel" height="40px" width="350px" align="center" valign="center" style="nifty-panel" childLayout="center">
                 <effect>
                     <onStartScreen  name="fade" startColor="#0000" endColor="#000f" length="1500"/>
                     <onEndScreen name="move" mode="out" direction="bottom" length="300" startDelay="0" inherit="true"/>
                 </effect>
-                <text style="nifty-label" text="Welcome to MonkeyZone!" >
+                <text style="nifty-label" text="Heraldry v0.1" >
                     <effect>
                         <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
                     </effect>
                 </text>
-                <text style="nifty-label" text=""/>
-                <image align="center" valign="center" filename="Interface/Images/logo.gif" >
+            </panel>
+			<panel id="logopanel" height="80px" width="350px" align="center" valign="center" style="nifty-panel" childLayout="center">                
+                <image align="center" valign="center" filename="Interface/Images/logo.png" >
                     <effect>
                         <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
                     </effect>
                 </image>
+            </panel>
+            <panel id="loginpanel" height="200px" width="350px" align="center" valign="center" style="nifty-panel" childLayout="vertical">
+                <text style="nifty-label" text="Username" valign="center"/>
+                <control id="username_text" name="textfield" align="center" valign="center" width="60%"/>
+                <text style="nifty-label" text="Password" valign="center"/>
+                <control id="password_text" name="textfield" align="center" valign="center" width="60%"/>
                 <text style="nifty-label" text=""/>
-                <text style="nifty-label" text="Enter Username" valign="center"/>
-                <control id="username_text" name="textfield" align="center" valign="center" width="60%">
-                    <interact onEnter="connect()"/>
-                </control>
-                <text style="nifty-label" text=""/>
-                <control id="start_button" name="button" label="Start Game" align="center">
-                    <interact onClick="connect()"/>
-                    <effect>
-                        <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
-                    </effect>
-                </control>
-                <text style="nifty-label" text=""/>
+                <panel id="loginpanel" height="80px" width="200px" align="center" valign="bottom" childLayout="horizontal">
+	                <control id="start_button" name="button" label="Start Game" align="center" width="100px" >
+	                    <interact onClick="connect()"/>
+	                    <effect>
+	                        <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
+	                    </effect>
+	                </control>
+	                <control id="quit_button" name="button" label="Quit Game" align="center"  width="100px">
+	                    <interact onClick="quit()"/>
+	                    <effect>
+	                        <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
+	                    </effect>
+	                </control>
+                </panel>
+            </panel>
+            <panel id="statuspanel" height="20px" width="350px" align="center" valign="center" childLayout="center">
                 <text id="status_text" font="aurulent-sans-16.fnt" color="#ffff" text="" align="center" valign="center" >
                     <effect>
                         <onStartScreen name="fade" startColor="#0000" endColor="#000f" length="1500" startDelay="250"/>
@@ -54,6 +66,10 @@
     <screen id="lobby" controller="com.undebugged.heraldry.client.HeraldryClient">
         <layer id="layer" childLayout="vertical">
             <panel id="panel" childLayout="horizontal">
+                <effect>
+                    <onStartScreen name="move" mode="in" direction="top" length="300" startDelay="0" inherit="true"/>
+                    <onEndScreen name="move" mode="out" direction="bottom" length="300" startDelay="0" inherit="true"/>
+                </effect>                
                 <panel id="players_panel" height="100%" width="320px" valign="center" style="nifty-panel" childLayout="vertical">
                     <text style="nifty-label" text="Players Online" valign="center"/>
                     <panel id="panel" childLayout="horizontal">
@@ -66,14 +82,7 @@
                 <panel id="main_panel" height="100%" width="*" valign="center" style="nifty-panel" childLayout="vertical">
                     <text style="nifty-label" id="game_name" text="Heraldry v0.1" valign="center"/>
                     <text style="nifty-label" text="" valign="center"/>
-                    <text style="nifty-label" text="To play, everybody has to connect first" valign="center"/>
-                    <text style="nifty-label" text="then press the start game button" valign="center"/>
-                    <text style="nifty-label" text="the game will launch for all clients." valign="center"/>
-                    <text style="nifty-label" text="" valign="center"/>
-                    <text style="nifty-label" text="When theres no players online anymore, the game" valign="center"/>
-                    <text style="nifty-label" text="will stop and can be started again." valign="center"/>
-                    <text style="nifty-label" text="" valign="center"/>
-                    <text style="nifty-label" text="Have Fun!" valign="center"/>
+                    <text style="nifty-label" text="The Slightly Multiplayer Online RPG" valign="center"/>
                 </panel>
                 <panel id="maps_panel" height="100%" width="300px" valign="center" style="nifty-panel" childLayout="vertical">
                     <text style="nifty-label" text="Available Maps" valign="center"/>
@@ -87,31 +96,28 @@
                     <control id="start_server_button" name="button" label="Start Game" align="center">
                         <interact onClick="startGame()"/>
                     </control>
+                     <control id="quit_button" name="button" label="Quit Game" align="center">
+                        <interact onClick="quit()"/>
+                    </control>                   
                 </panel>
+            </panel>
+            <panel id="bottom_panel" childLayout="horizontal" style="nifty-panel" height="30%">
                 <effect>
                     <onStartScreen name="move" mode="in" direction="top" length="300" startDelay="0" inherit="true"/>
                     <onEndScreen name="move" mode="out" direction="bottom" length="300" startDelay="0" inherit="true"/>
                 </effect>
-            </panel>
-            <panel id="bottom_panel" childLayout="horizontal" style="nifty-panel" height="30%">
                 <panel id="chat_panel" childLayout="vertical">
                     <control id="chat_list" name="listBox" horizontal="false" height="*" childLayout="vertical" visibleToMouse="true">
                         <panel id="chat_list_panel" childLayout="vertical" visibleToMouse="true" width="100%" padding="20px" >
                         </panel>
                     </control>
                     <panel id="chat_bottom_bar" childLayout="horizontal">
-                        <control id="chat_text" name="textfield" valign="center">
-                            <interact onEnter="sendChat()"/>
-                        </control>
+                        <control id="chat_text" name="textfield" valign="center"/>
                         <control id="send_button" name="button" label="send" valign="center">
                             <interact onClick="sendChat()"/>
                         </control>
                     </panel>
                 </panel>
-                <effect>
-                    <onStartScreen name="move" mode="in" direction="top" length="300" startDelay="0" inherit="true"/>
-                    <onEndScreen name="move" mode="out" direction="bottom" length="300" startDelay="0" inherit="true"/>
-                </effect>
             </panel>
         </layer>
     </screen>
@@ -134,6 +140,10 @@
         <layer id="layer" childLayout="vertical">
             <panel id="panel_top" childLayout="horizontal">
                 <panel id="top_panel_left" height="60px" width="90%" align="left" valign="top" style="nifty-panel" childLayout="horizontal">
+					<effect>
+						<onStartScreen name="move" mode="in" direction="top" length="200" startDelay="0" inherit="true"/>
+						<onEndScreen name="move" mode="out" direction="top" length="200" startDelay="400" inherit="true"/>
+					</effect>
                     <text id="status_text_01" font="aurulent-sans-16.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
                     <text id="status_text_02" font="aurulent-sans-16.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
                     <text id="status_text_03" font="aurulent-sans-16.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
@@ -144,17 +154,13 @@
                     <text id="status_text_08" font="aurulent-sans-16.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
                     <text id="status_text_09" font="aurulent-sans-16.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
                     <text id="status_text_00" font="aurulent-sans-16.fnt" color="#ffff" text="Text Me Off" align="center" valign="center" />
-					<effect>
-						<onStartScreen name="move" mode="in" direction="top" length="200" startDelay="0" inherit="true"/>
-						<onEndScreen name="move" mode="out" direction="top" length="200" startDelay="400" inherit="true"/>
-					</effect>
                 </panel>
                 <panel id="top_panel_right" height="60px" width="10%" align="right" valign="top" style="nifty-panel" childLayout="horizontal">
-                    <text id="status_text_01" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="left" valign="center" />
 					<effect>
 						<onStartScreen name="move" mode="in" direction="right" length="200" startDelay="200" inherit="true"/>
 						<onEndScreen name="move" mode="out" direction="right" length="100" startDelay="200" inherit="true"/>
 					</effect>
+                    <text id="status_text_01" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="left" valign="center" />
                 </panel>
             </panel>
             <panel id="buffer_panel" width="100%" childLayout="center">            
@@ -168,18 +174,22 @@
 			</panel>
             <panel id="panel_bottom" childLayout="horizontal">
                 <panel id="bottom_panel_left" height="120px" width="200px" align="left" valign="bottom" style="nifty-panel" childLayout="vertical">
-                    <text id="status_text_01" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
-                    <text id="status_text_02" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
-                    <text id="status_text_03" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />	
 					<effect>
 						<onStartScreen name="move" mode="in" direction="bottom" length="200" startDelay="400" inherit="true"/>
 						<onEndScreen name="move" mode="out" direction="bottom" length="200" startDelay="0" inherit="true"/>
 					</effect>
+                    <text id="status_text_01" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_02" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
+                    <text id="status_text_03" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />	
                 </panel>
                 <panel id="buffer_panel">
 
                 </panel>
                 <panel id="bottom_panel_right" height="250px" width="250px" align="right" valign="bottom" style="nifty-panel" childLayout="vertical">
+					<effect>
+						<onStartScreen name="move" mode="in" direction="bottom" length="400" startDelay="600" inherit="true"/>
+						<onEndScreen name="move" mode="out" direction="bottom" length="200" startDelay="0" inherit="true"/>
+					</effect>
                     <text id="status_text_01" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
                     <text id="status_text_02" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
                     <text id="status_text_03" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
@@ -190,10 +200,6 @@
                     <text id="status_text_08" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
                     <text id="status_text_09" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
                     <text id="status_text_00" font="aurulent-sans-16.fnt" color="#ffff" text="Text" align="center" valign="center" />
-					<effect>
-						<onStartScreen name="move" mode="in" direction="bottom" length="400" startDelay="600" inherit="true"/>
-						<onEndScreen name="move" mode="out" direction="bottom" length="200" startDelay="0" inherit="true"/>
-					</effect>
                 </panel>
             </panel>
         </layer>

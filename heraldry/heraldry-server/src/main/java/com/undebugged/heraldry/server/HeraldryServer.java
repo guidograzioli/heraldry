@@ -82,4 +82,8 @@ public class HeraldryServer extends SimpleApplication {
         super.destroy();
         server.close();
     }
+
+	public ServerNetListener getListenerManager() {
+		return listenerManager;
+	}
 }
